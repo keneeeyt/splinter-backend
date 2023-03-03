@@ -12,14 +12,14 @@ const jwt = require('jsonwebtoken');
             
             const username = await User.findOne({userName: newUserName})
             if(username){
-                return res.json({msg: 'username is already taken!'})
+                return res.status(400).json({msg: 'username is already taken!'})
             }
             const userEmail = await User.findOne({email})
                 if(userEmail){
-                    return res.json({msg: 'this email is already taken!'})
+                    return res.status(400).json({msg: 'this email is already taken!'})
                 }
             if(password.length < 5){
-                return res.json({msg: 'Password must be at least 5 characters.'})
+                return res.status(400).json({msg: 'Password must be at least 5 characters.'})
             }   
             const passwordHash = await bcrypt.hashSync(password, 10)
 
@@ -46,7 +46,7 @@ const jwt = require('jsonwebtoken');
                 }
             })
         }catch(err) {
-          return  res.send(err)
+            return res.status(500).json({msg: err.message})
         }
     },
     //this controller is for login
@@ -57,12 +57,12 @@ const jwt = require('jsonwebtoken');
             const user = await User.findOne({email}).populate('followers following', '-password')
            
             if(!user){
-                return res.json({msg: 'Email is not yet register!'})
+                return res.status(400).json({msg: 'Email is not yet register!'})
             }
             
             const isMatch = await bcrypt.compareSync(password, user.password)
             if(!isMatch){
-                return res.json({msg: 'Password is incorrect!'})
+                return res.status(400).json({msg: 'Password is incorrect!'})
             }
             
             const accessToken = createAccessToken({id: user._id})
@@ -84,7 +84,7 @@ const jwt = require('jsonwebtoken');
                 }
             })
         }catch(err) {
-          return  res.send(err)
+            return res.status(500).json({msg: err.message})
         }
     },
     //this controller is for logout
@@ -95,7 +95,7 @@ const jwt = require('jsonwebtoken');
             })
             return res.json({msg: 'logged out successfully!'})
         }catch(err) {
-          return  res.send({msg: err.message})
+            return res.status(500).json({msg: err.message})
         }
     },
     //this controller is for generating accesstoken when login
@@ -103,17 +103,17 @@ const jwt = require('jsonwebtoken');
         try {
                 const refreshTokenUser = req.cookies.refreshtoken
                 if(!refreshTokenUser){
-                    return res.json({msg: 'Please login first!'})
+                    return res.status(400).json({msg: 'Please login first!'})
                 }
                 jwt.verify(refreshTokenUser, process.env.REFRESH_TOKEN_SECRET, async(err, result) => {
                     if(err) {
-                        return res.json({msg: 'Please login first!'})
+                        return res.status(400).json({msg: 'Please login first!'})
                     }
                     const user = await User.findById(result.id).select('-password')
                     .populate('followers following', '-password')
 
                     if(!user){
-                        return res.json({msg: 'This does not even exist!'})
+                        return res.status(400).json({msg: 'This does not even exist!'})
                     }
 
                     const access_token = createAccessToken({id: result.id})
@@ -125,7 +125,7 @@ const jwt = require('jsonwebtoken');
                 })
                 
         }catch(err) {
-          return  res.send({msg: err.message})
+            return res.status(500).json({msg: err.message})
         }
     }
     }
