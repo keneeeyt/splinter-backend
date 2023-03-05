@@ -15,6 +15,7 @@ app.use(cookieParser());
 
 //Routes
 app.use('/api', require('./routes/userRoute'));
+app.use('/api', require('./routes/myUserRoute'));
 
 //Mongodb connection
 
