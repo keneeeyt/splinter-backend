@@ -16,11 +16,12 @@ app.use(cookieParser());
 //Routes
 app.use('/api', require('./routes/userRoute'));
 app.use('/api', require('./routes/myUserRoute'));
+app.use('/api', require('./routes/postRoute'));
 
 //Mongodb connection
 
 const URI = process.env.MONGODB_URL
-
+mongoose.set('strictQuery', true)
 mongoose.connect(URI,{
     useNewUrlParser: true,
     useUnifiedTopology: true,
