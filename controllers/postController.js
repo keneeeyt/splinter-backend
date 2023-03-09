@@ -22,7 +22,6 @@ const postController = {
         },
         getPosts: async (req,res) => {
             try{
-              console.log(req.user) 
               const posts = await Post.find({
                 user: [...req.user.following, req.user._id]
             }).sort('-createdAt')
@@ -54,6 +53,35 @@ const postController = {
                 return res.status(500).json({error: err.msg})
             }
         },
+        likePost: async (req,res) => {
+
+            try {
+                const post = await Post.find({_id: req.params._id, likes: req.user._id})
+                    if(post.length > 0) return res.status(400).json({msg:"Liked this post!"})
+                    await Post.findOneAndUpdate({_id:req.params._id}, {
+                           $push: {likes: req.user._id} 
+                    }, {new: true})
+                    res.json({msg: 'Liked a post!'})
+            }
+           
+            catch(err) {
+                return res.status(500).json({error: err.message})
+            }
+        },
+        unLikePost: async (req,res) => {
+
+            try {
+               
+                    await Post.findOneAndUpdate({_id:req.params._id}, {
+                           $pull: {likes: req.user._id} 
+                    }, {new: true})
+                    res.json({msg: 'unLiked a post!'})
+            }
+           
+            catch(err) {
+                return res.status(500).json({error: err.message})
+            }
+        }
 }
 
 module.exports = postController;
